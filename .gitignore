@@ -1,0 +1,24 @@
+# --- IDE and System Junk ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- React / Frontend ---
+# This ensures that even if the sub-gitignore fails, we don't upload modules
+**/node_modules/
+**/dist/
+**/build/
+.env*
+
+# --- Spring Boot / Backend ---
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+.mvn/
+help.md
+
+# --- Logs ---
+*.log
