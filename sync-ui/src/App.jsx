@@ -21,7 +21,7 @@ function App() {
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS('/ws'),
       onConnect: () => {
         setIsConnected(true);
         client.subscribe('/topic/room', (message) => {
