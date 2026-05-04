@@ -2,13 +2,15 @@ package com.example.demo.model;
 
 public class PlayerAction {
     private String action;
+    private String sender;
     private double timestamp;
 
     public PlayerAction() {
     }
 
-    public PlayerAction(String action, double timestamp) {
+    public PlayerAction(String action, String sender, double timestamp) {
         this.action = action;
+        this.sender = sender;
         this.timestamp = timestamp;
     }
 
@@ -18,6 +20,12 @@ public class PlayerAction {
     }
     public void setAction(String action) {
         this.action = action;
+    }
+    public String getSender() {
+        return sender;
+    }
+    public void setSender(String sender) {
+        this.sender = sender;
     }
     public double getTimestamp() {
         return timestamp;

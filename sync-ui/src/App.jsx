@@ -5,7 +5,8 @@ import { Client } from '@stomp/stompjs';
 function App() {
   const videoRef = useRef(null);
   const stompClientRef = useRef(null);
-  const chatEndRef = useRef(null); // For auto-scrolling chat
+  const chatEndRef = useRef(null); 
+  const isProcessingMessage = useRef(false); // THE LOCK
   
   const [isConnected, setIsConnected] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
@@ -14,7 +15,6 @@ function App() {
   const [username, setUsername] = useState("");
   const [hasJoined, setHasJoined] = useState(false);
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -31,14 +31,29 @@ function App() {
             setMessages((prev) => [...prev, data]);
           } else { 
             if (!videoRef.current) return;
+
+            // --- THE FIX: IDENTIFY SENDER AND LOCK ---
+            // 1. If I sent this, ignore it to prevent infinite loop
+            if (data.sender === username) return;
+
+            // 2. Set lock to true so our local event listeners don't fire back
+            isProcessingMessage.current = true;
+
+            // 3. Sync time only if difference is significant
             if (Math.abs(videoRef.current.currentTime - data.timestamp) > 0.5) {
               videoRef.current.currentTime = data.timestamp;
             }
+
             if (data.action === 'PLAY') {
               videoRef.current.play().catch(() => {});
             } else if (data.action === 'PAUSE') {
               videoRef.current.pause();
             }
+
+            // 4. Release lock after the video has had time to react
+            setTimeout(() => {
+                isProcessingMessage.current = false;
+            }, 50);
           }
         });
       },
@@ -47,13 +62,22 @@ function App() {
     client.activate();
     stompClientRef.current = client;
     return () => client.deactivate();
-  }, []);
+  }, [username]); // Added username to dependency to ensure check works
 
   const sendAction = (action) => {
+    // --- THE FIX: PREVENT ECHO ---
+    // If we are currently processing a server command, don't send a message back
+    if (isProcessingMessage.current) return;
+
     if (stompClientRef.current?.connected && videoRef.current) {
       stompClientRef.current.publish({
         destination: '/app/sync',
-        body: JSON.stringify({ action, timestamp: videoRef.current.currentTime })
+        // Now sending 'sender' so others can identify us
+        body: JSON.stringify({ 
+            sender: username, 
+            action, 
+            timestamp: videoRef.current.currentTime 
+        })
       });
     }
   };
@@ -67,7 +91,6 @@ function App() {
       setChatInput("");
     }
   };
-
   // --- VIEW 1: JOIN SCREEN ---
   if (!hasJoined) {
     return (
