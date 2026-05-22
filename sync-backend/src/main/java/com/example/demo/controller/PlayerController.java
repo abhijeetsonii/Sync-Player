@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.PlayerAction;
-
+import com.example.demo.model.SignalMessage;
 import com.example.demo.model.ChatMessage;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -20,6 +20,13 @@ public class PlayerController {
     @SendTo("/topic/room")
     public ChatMessage handleChat(ChatMessage message) {
         System.out.println("Chat from " + message.getSender() + ": " + message.getContent());
+        return message;
+    }
+
+    @MessageMapping("/signal")
+    @SendTo("/topic/room")
+    public SignalMessage handleSignal(SignalMessage message) {
+        System.out.println("Signal from " + message.getSender() + ": " + message.getType());
         return message;
     }
 }
