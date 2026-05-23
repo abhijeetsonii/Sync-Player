@@ -129,7 +129,7 @@ function App() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Toggle video call panel with Alt + V (ignoring if user is typing in chat input)
-      if (e.altKey && e.key.toLowerCase() === 'v') {
+      if (e.altKey && e.code === 'KeyV') {
         if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
           return; // Don't trigger if they are typing a chat message
         }
@@ -293,8 +293,17 @@ function App() {
       const sidebarRemote = document.getElementById('remoteVideo');
       const floatingRemote = document.getElementById('remoteVideoFloat');
 
-      if (sidebarRemote && sidebarRemote.srcObject !== remoteStream) sidebarRemote.srcObject = remoteStream;
-      if (floatingRemote && floatingRemote.srcObject !== remoteStream) floatingRemote.srcObject = remoteStream;
+      if (sidebarRemote && sidebarRemote.srcObject !== remoteStream) {
+        sidebarRemote.srcObject = remoteStream;
+        // Force mobile browsers to play the media
+        sidebarRemote.play().catch(err => console.warn("Mobile autoplay prevented:", err)); 
+      }
+      
+      if (floatingRemote && floatingRemote.srcObject !== remoteStream) {
+        floatingRemote.srcObject = remoteStream;
+        // Force mobile browsers to play the media
+        floatingRemote.play().catch(err => console.warn("Mobile autoplay prevented:", err));
+      }
     }
     
   // Don't forget to add remoteStream to the dependency array here!
@@ -378,12 +387,25 @@ function App() {
         {/* Header - Hidden in Fullscreen */}
         {!isFullscreen && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
-              <span style={{ color: '#00d4ff' }}>Sync</span>Watch {isConnected ? '🟢' : '🔴'}
-            </h2>
+            
+            {/* LEFT SIDE: Logo & Mobile Camera Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
+                <span style={{ color: '#00d4ff' }}>Sync</span>Watch {isConnected ? '🟢' : '🔴'}
+              </h2>
+              <button 
+                onClick={() => setShowVideoCall(prev => !prev)}
+                style={{ background: '#222', color: '#ccc', border: '1px solid #444', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', transition: '0.2s' }}
+              >
+                {showVideoCall ? '📷 Hide Cameras' : '📷 Show Cameras'}
+              </button>
+            </div>
+
+            {/* RIGHT SIDE: File Picker */}
             <div style={{ background: '#1a1a1a', padding: '5px 15px', borderRadius: '20px', fontSize: '0.8rem', border: '1px solid #333' }}>
               File: <input type="file" accept="video/*" onChange={(e) => setVideoUrl(URL.createObjectURL(e.target.files[0]))} style={{ color: '#888', fontSize: '0.7rem' }} />
             </div>
+            
           </div>
         )}
 
