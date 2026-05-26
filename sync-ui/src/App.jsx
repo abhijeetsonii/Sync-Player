@@ -433,8 +433,8 @@ function App() {
           </button>
 
           {/* FLOATING VIDEO CALL (Only visible in Fullscreen + Alt+V enabled) */}
-          {isFullscreen && showVideoCall && (
-            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100, display: 'flex', gap: '10px', background: 'rgba(10, 10, 10, 0.6)', padding: '10px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {isFullscreen && (
+            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100, display: showVideoCall ? 'flex' : 'none', gap: '10px', background: 'rgba(10, 10, 10, 0.6)', padding: '10px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <video id="localVideoFloat" autoPlay playsInline muted style={{ width: '120px', height: '90px', borderRadius: '8px', objectFit: 'cover', transform: 'scaleX(-1)', background: '#222' }} />
               <video id="remoteVideoFloat" autoPlay playsInline style={{ width: '120px', height: '90px', borderRadius: '8px', objectFit: 'cover', background: '#222' }} />
             </div>
@@ -458,53 +458,57 @@ function App() {
           </div>
 
           {/* SIDEBAR VIDEO CALL AREA (Side-by-side) */}
-          {showVideoCall && (
-            <div style={{ padding: '15px', borderBottom: '1px solid #222', background: '#151515' }}>
-              <div style={{ display: 'flex', gap: '10px', height: '100px' }}>
-                {/* Local Camera */}
-                <div style={{ flex: 1, position: 'relative', background: '#222', borderRadius: '8px', overflow: 'hidden' }}>
-                  <video id="localVideo" autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
-                  <span style={{ position: 'absolute', bottom: '4px', left: '6px', fontSize: '10px', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: '4px' }}>You</span>
-                </div>
-                {/* Remote Camera */}
-                <div style={{ flex: 1, position: 'relative', background: '#222', borderRadius: '8px', overflow: 'hidden' }}>
-                  <video id="remoteVideo" autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <span style={{ position: 'absolute', bottom: '4px', left: '6px', fontSize: '10px', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: '4px' }}>Friend</span>
-                </div>
+          <div style={{ 
+            display: showVideoCall ? 'block' : 'none', // <--- THE CSS FIX
+            padding: '15px', 
+            borderBottom: '1px solid #222', 
+            background: '#151515' 
+          }}>
+            <div style={{ display: 'flex', gap: '10px', height: '100px' }}>
+              {/* Local Camera */}
+              <div style={{ flex: 1, position: 'relative', background: '#222', borderRadius: '8px', overflow: 'hidden' }}>
+                <video id="localVideo" autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                <span style={{ position: 'absolute', bottom: '4px', left: '6px', fontSize: '10px', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: '4px' }}>You</span>
               </div>
-              {/* If stream is active, show Start Call. If not, show Enable Camera */}
-              {localStream ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-                  
-                  {/* Start / End Call Button */}
-                  {!inCall ? (
-                    <button onClick={startCall} style={{ background: '#007bff', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                      Start Video Call
-                    </button>
-                  ) : (
-                    <button onClick={endCall} style={{ background: '#dc3545', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                      End Video Call
-                    </button>
-                  )}
-
-                  {/* Mute and Stop Video Buttons */}
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={toggleAudio} style={{ flex: 1, background: isAudioMuted ? '#dc3545' : '#444', border: 'none', padding: '6px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                      {isAudioMuted ? 'Unmute' : 'Mute'}
-                    </button>
-                    <button onClick={toggleVideo} style={{ flex: 1, background: isVideoStopped ? '#dc3545' : '#444', border: 'none', padding: '6px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                      {isVideoStopped ? 'Turn on Video' : 'Stop Video'}
-                    </button>
-                  </div>
-                  
-                </div>
-              ) : (
-                 <button onClick={startLocalStream} style={{ width: '100%', marginTop: '10px', background: '#28a745', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                   Enable Camera
-                 </button>
-              )}
+              {/* Remote Camera */}
+              <div style={{ flex: 1, position: 'relative', background: '#222', borderRadius: '8px', overflow: 'hidden' }}>
+                <video id="remoteVideo" autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <span style={{ position: 'absolute', bottom: '4px', left: '6px', fontSize: '10px', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: '4px' }}>Friend</span>
+              </div>
             </div>
-          )}
+
+            {/* If stream is active, show Start Call. If not, show Enable Camera */}
+            {localStream ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                
+                {/* Start / End Call Button */}
+                {!inCall ? (
+                  <button onClick={startCall} style={{ background: '#007bff', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    Start Video Call
+                  </button>
+                ) : (
+                  <button onClick={endCall} style={{ background: '#dc3545', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    End Video Call
+                  </button>
+                )}
+
+                {/* Mute and Stop Video Buttons */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={toggleAudio} style={{ flex: 1, background: isAudioMuted ? '#dc3545' : '#444', border: 'none', padding: '6px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                    {isAudioMuted ? 'Unmute' : 'Mute'}
+                  </button>
+                  <button onClick={toggleVideo} style={{ flex: 1, background: isVideoStopped ? '#dc3545' : '#444', border: 'none', padding: '6px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                    {isVideoStopped ? 'Turn on Video' : 'Stop Video'}
+                  </button>
+                </div>
+                
+              </div>
+            ) : (
+               <button onClick={startLocalStream} style={{ width: '100%', marginTop: '10px', background: '#28a745', border: 'none', padding: '8px', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                 Enable Camera
+               </button>
+            )}
+          </div>
 
           {/* Messages Area */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
